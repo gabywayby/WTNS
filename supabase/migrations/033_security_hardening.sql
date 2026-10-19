@@ -34,6 +34,9 @@ as $$
 declare
   pending_count integer;
 begin
+  -- Serialize pending-order checks for this customer within the transaction.
+  perform pg_advisory_xact_lock(hashtextextended(new.user_id::text, 0));
+
   select count(*) into pending_count
   from public.orders
   where user_id = new.user_id and status = 'pending';

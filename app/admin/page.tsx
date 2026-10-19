@@ -104,20 +104,20 @@ async function AdminContent({
                       {variants.map((variant) => <fieldset className="admin-stock-style" key={variant.id}>
                         <legend>{variant.name}</legend>
                         <label className="admin-variant-price">Price (PHP)<input name={`variant_price_${variant.id}`} type="number" min="0" step="1" defaultValue={variant.price_php} required /></label>
-                        <div className="admin-stock-sizes">{sizes.map((size) => {
+                        <div className="admin-overview admin-demand-overview admin-stock-sizes">{sizes.map((size) => {
                           const stock = variant.variant_stock?.find((row) => row.size === size)?.stock ?? 0;
                           const fieldName = `variant_stock_${variant.id}_${size}`;
-                          return <label key={size}>{size}<input name={fieldName} type="number" min="0" step="1" defaultValue={stock} /><input type="hidden" name={`orig_${fieldName}`} value={stock} /></label>;
+                          return <label className="admin-stat-card" key={size}><span>Size {size}</span><input name={fieldName} type="number" min="0" step="1" defaultValue={stock} /><input type="hidden" name={`orig_${fieldName}`} value={stock} /></label>;
                         })}</div>
                       </fieldset>)}
                       <p>Pre-orders placed before the end date never reduce stock. Enter the stock you have available for sales after the pre-order.</p>
                     </div>
                   ) : (
                     <div className="admin-stock-styles">
-                      <h3>Stock for sale after pre-order</h3><div className="admin-stock-sizes">{sizes.map((size) => {
+                      <h3>Stock for sale after pre-order</h3><div className="admin-overview admin-demand-overview admin-stock-sizes">{sizes.map((size) => {
                         const stock = productSizes.find((row) => row.size === size)?.stock ?? 0;
                         const fieldName = `product_stock_${size}`;
-                        return <label key={size}>{size}<input name={fieldName} type="number" min="0" step="1" defaultValue={stock} /><input type="hidden" name={`orig_${fieldName}`} value={stock} /></label>;
+                        return <label className="admin-stat-card" key={size}><span>Size {size}</span><input name={fieldName} type="number" min="0" step="1" defaultValue={stock} /><input type="hidden" name={`orig_${fieldName}`} value={stock} /></label>;
                       })}</div>
                       <p>Pre-orders placed before the end date never reduce stock. Enter the stock you have available for sales after the pre-order.</p>
                     </div>
