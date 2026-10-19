@@ -1,69 +1,75 @@
 import Image from "next/image";
-
-export default function Home() {
-  return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+import Link from "next/link";
+import { Suspense } from "react";
+import Countdown from "@/components/Countdown";
+import HeroPointer from "@/components/HeroPointer";
+import HeroSlideshow from "@/components/HeroSlideshow";
+import LoginErrorBanner from "@/components/LoginErrorBanner";
+import ProductCard from "@/components/ProductCard";
+import { getProducts, isPreorderActive, isPreorderClosed } from "@/lib/data";
+import { horizon } from "@/app/fonts";
+function Loading() { return <div className="section muted">Loading WTNS collection…</div>; }
+const heroImage = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/product-photos/child-of-god-hero.jpg`;
+const storagePhoto = (filename: string) => `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/product-photos/${filename}.jpg`;
+function HomeHero({ preorderClosed, preorderActive, images, preorderOpensAt, preorderClosesAt }: { preorderClosed: boolean; preorderActive: boolean; images: { src: string; alt: string }[]; preorderOpensAt: string | null; preorderClosesAt: string | null }) {
+  const countdownDate = preorderActive ? preorderClosesAt : preorderOpensAt;
+  const countdownLabel = preorderActive ? "Pre-orders close · Asia/Manila" : "Pre-orders open · Asia/Manila";
+  return <section className={`hero${preorderClosed && !preorderActive ? " hero-preorder-open" : ""}`}>
+    <HeroSlideshow images={images} />
+    <div className="hero-overlay" aria-hidden="true" />
+    <HeroPointer>
+      <div className="hero-copy">
+        <span className="eyebrow">Independent streetwear · Philippines</span>
+        <h1 className={horizon.className}>WTNS.</h1>
+        <p className="tagline">Witness To Nations’ Souls.<br />Wear what you stand for.</p>
+        <div className="hero-actions">
+          <Link className="button" href="/shop/child-of-god">Child Of God ↗</Link>
+          <Link className="button button-outline" href="/shop">Explore collection</Link>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
-  );
+      </div>
+      {countdownDate && (preorderClosed || preorderActive) && <div className="hero-drop-countdown"><span className="eyebrow">{countdownLabel}</span><Countdown date={countdownDate} /></div>}
+    </HeroPointer>
+  </section>;
 }
+async function HomeContent() {
+  const products = await getProducts();
+  const cog = products.find((p) => p.slug === "child-of-god") ?? products[1];
+  const eye = products.find((p) => p.slug === "eye-witness") ?? products[0];
+  const closed = isPreorderClosed(cog);
+  const preorderActive = isPreorderActive(cog);
+  const releaseBadge = closed ? "Coming Soon" : preorderActive ? "Pre-Order Open" : "Now Available";
+  const campaignPhoto = (filename: string) => cog.product_images.find((photo) =>
+    new RegExp(`/${filename}\\.(jpg|jpeg|png|webp)([?].*)?$`, "i").test(photo.url)
+  )?.url;
+  const SLIDE_POSITIONS: Record<string, string> = {
+    "child-of-god-18": "center 25%",
+    "child-of-god-19": "center 30%",
+    "child-of-god-back-standard": "center 35%",
+  };
+  const requestedSlides = [
+    { src: campaignPhoto("child-of-god-18") ?? storagePhoto("child-of-god-18"), alt: "Child Of God campaign photo 18" },
+    { src: campaignPhoto("child-of-god-19") ?? storagePhoto("child-of-god-19"), alt: "Child Of God campaign photo 19" },
+    { src: heroImage, alt: "Original Child Of God hero photo" },
+    { src: campaignPhoto("child-of-god-back-standard"), alt: "Child Of God Standard shirt back photo" },
+  ].filter((photo): photo is { src: string; alt: string } => !!photo.src);
+  const campaignSlides = requestedSlides.map((photo) => {
+    const filename = decodeURIComponent(new URL(photo.src).pathname.split("/").pop() ?? "");
+    const key = filename.replace(/\.[^.]+$/, "").toLowerCase();
+    const objectPosition = SLIDE_POSITIONS[key];
+    return objectPosition ? { ...photo, objectPosition } : photo;
+  });
+  const heroSlides = closed
+    ? cog.teaser_image_url ? [{ src: cog.teaser_image_url, alt: "Child Of God sneak peek" }] : []
+    : campaignSlides.length ? campaignSlides : [{ src: heroImage, alt: "WTNS Child Of God campaign photo" }];
+  const featureImage = closed ? cog.teaser_image_url : cog.product_images[0]?.url ?? cog.teaser_image_url;
+
+  return <>
+    <HomeHero preorderClosed={closed} preorderActive={preorderActive} images={heroSlides} preorderOpensAt={cog.preorder_opens_at} preorderClosesAt={cog.preorder_closes_at} />
+    <section className="section">
+      <div className="section-heading"><div><span className="eyebrow">Featured release / 02</span><h2>CHILD OF GOD</h2></div><span className="badge">{releaseBadge}</span></div>
+      <div className="feature"><div className="feature-image">{featureImage && <Image src={featureImage} alt={cog.name} fill sizes="(max-width:760px) 100vw, 60vw" />}</div><div className="feature-copy"><span className="eyebrow">{closed ? "Release countdown" : "The full release"}</span><h3>{closed ? "A new chapter is coming." : cog.name}</h3><p>{cog.description}</p><Link className="button" href={`/shop/${cog.slug}`}>{closed ? "View the teaser" : "Explore release"}</Link></div></div>
+    </section>
+    <section className="section"><div className="section-heading"><div><span className="eyebrow">Archive / 01</span><h2>EYE WITNESS</h2></div><span className="badge">Sold Out</span></div><div className="product-grid"><ProductCard product={eye}/></div></section>
+  </>;
+}
+export default function Home() { return <><Suspense fallback={null}><LoginErrorBanner /></Suspense><Suspense fallback={<Loading/>}><HomeContent/></Suspense></>; }
