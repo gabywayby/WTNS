@@ -1,12 +1,12 @@
 import Image from "next/image";
 import Link from "next/link";
-import { Suspense } from "react";
+import { Suspense, type ReactNode } from "react";
 import Countdown from "@/components/Countdown";
 import HeroPointer from "@/components/HeroPointer";
 import HeroSlideshow from "@/components/HeroSlideshow";
 import LoginErrorBanner from "@/components/LoginErrorBanner";
 import ProductCard from "@/components/ProductCard";
-import { getProducts, isPreorderActive, isPreorderClosed } from "@/lib/data";
+import { getProducts, isPreorderActive, isPreorderClosed, type Product } from "@/lib/data";
 import { horizon } from "@/app/fonts";
 function Loading() { return <div className="section muted">Loading WTNS collection…</div>; }
 const heroImage = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/product-photos/child-of-god-hero.jpg`;
@@ -29,6 +29,37 @@ function HomeHero({ preorderClosed, preorderActive, images, preorderOpensAt, pre
       </div>
       {countdownDate && (preorderClosed || preorderActive) && <div className="hero-drop-countdown"><span className="eyebrow">{countdownLabel}</span><Countdown date={countdownDate} /></div>}
     </HeroPointer>
+  </section>;
+}
+function TeaserHero({ image, opensAt }: { image: string | null; opensAt: string | null }) {
+  return <section className={`hero hero-teaser${image ? "" : " hero-teaser-noimage"}`}>
+    {image && <div className="hero-teaser-backdrop" aria-hidden="true"><Image src={image} alt="" fill sizes="30vw" priority /></div>}
+    <div className="hero-teaser-shade" aria-hidden="true" />
+    <div className="hero-teaser-inner">
+      <div className="hero-teaser-copy">
+        <span className="eyebrow">Independent streetwear · Philippines</span>
+        <h1 className={horizon.className}>WTNS.</h1>
+        <p className="tagline">Witness To Nations’ Souls.<br />Wear what you stand for.</p>
+        {opensAt && <div className="teaser-countdown"><span className="eyebrow">Pre-orders open · Asia/Manila</span><Countdown date={opensAt} /></div>}
+        <div className="hero-actions">
+          <Link className="button" href="/shop/child-of-god">Child Of God ↗</Link>
+          <Link className="button button-outline" href="/shop">Explore collection</Link>
+        </div>
+      </div>
+      {image && <figure className="hero-teaser-frame">
+        <Image src={image} alt="Child Of God sneak peek" fill priority sizes="(max-width:760px) 100vw, 42vw" />
+        <figcaption>Sneak peek · Child Of God</figcaption>
+      </figure>}
+    </div>
+  </section>;
+}
+function ReleaseSection({ product, label, badge, children }: { product: Product; label: string; badge: string; children?: ReactNode }) {
+  return <section className="section home-release">
+    <div className="section-heading">
+      <div><span className="eyebrow">{label}</span><h2>{product.name.toUpperCase()}</h2></div>
+      <span className="badge">{badge}</span>
+    </div>
+    {children ?? <div className="product-grid"><ProductCard product={product} /></div>}
   </section>;
 }
 async function HomeContent() {
@@ -61,15 +92,15 @@ async function HomeContent() {
   const heroSlides = closed
     ? cog.teaser_image_url ? [{ src: cog.teaser_image_url, alt: "Child Of God sneak peek" }] : []
     : campaignSlides.length ? campaignSlides : [{ src: heroImage, alt: "WTNS Child Of God campaign photo" }];
-  const featureImage = closed ? cog.teaser_image_url : cog.product_images[0]?.url ?? cog.teaser_image_url;
 
   return <>
-    <HomeHero preorderClosed={closed} preorderActive={preorderActive} images={heroSlides} preorderOpensAt={cog.preorder_opens_at} preorderClosesAt={cog.preorder_closes_at} />
-    <section className="section">
-      <div className="section-heading"><div><span className="eyebrow">Featured release / 02</span><h2>CHILD OF GOD</h2></div><span className="badge">{releaseBadge}</span></div>
-      <div className="feature"><div className="feature-image">{featureImage && <Image src={featureImage} alt={cog.name} fill sizes="(max-width:760px) 100vw, 60vw" />}</div><div className="feature-copy"><span className="eyebrow">{closed ? "Release countdown" : "The full release"}</span><h3>{closed ? "A new chapter is coming." : cog.name}</h3><p>{cog.description}</p><Link className="button" href={`/shop/${cog.slug}`}>{closed ? "View the teaser" : "Explore release"}</Link></div></div>
-    </section>
-    <section className="section"><div className="section-heading"><div><span className="eyebrow">Archive / 01</span><h2>EYE WITNESS</h2></div><span className="badge">Sold Out</span></div><div className="product-grid"><ProductCard product={eye}/></div></section>
+    {closed
+      ? <TeaserHero image={cog.teaser_image_url} opensAt={cog.preorder_opens_at} />
+      : <HomeHero preorderClosed={closed} preorderActive={preorderActive} images={heroSlides} preorderOpensAt={cog.preorder_opens_at} preorderClosesAt={cog.preorder_closes_at} />}
+    <ReleaseSection product={cog} label="Featured release / 02" badge={releaseBadge}>
+      {closed ? <div className="feature feature-teaser"><div className="feature-teaser-title"><span className="eyebrow">Release countdown</span><h3>A new chapter is coming.</h3></div><div className="feature-teaser-body"><p>{cog.description}</p><Link className="button" href={`/shop/${cog.slug}`}>View the teaser</Link></div></div> : undefined}
+    </ReleaseSection>
+    <ReleaseSection product={eye} label="Archive / 01" badge="Sold Out" />
   </>;
 }
 export default function Home() { return <><Suspense fallback={null}><LoginErrorBanner /></Suspense><Suspense fallback={<Loading/>}><HomeContent/></Suspense></>; }
