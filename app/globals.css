@@ -172,3 +172,100 @@ a:focus-visible,button:focus-visible,select:focus-visible,input:focus-visible,su
 .product-grid>.product-card:only-child .product-meta{flex-direction:column-reverse;justify-content:center;align-items:flex-start;gap:20px;padding:clamp(26px,5vw,70px)}
 .product-grid>.product-card:only-child .product-meta h3{font-size:clamp(30px,4.4vw,56px);line-height:.95;letter-spacing:-.05em;margin:0 0 10px}
 @media(max-width:760px){.product-grid>.product-card:only-child{display:block}.product-grid>.product-card:only-child .product-meta{flex-direction:row;justify-content:space-between;align-items:start;padding:19px 20px}.product-grid>.product-card:only-child .product-meta h3{font-size:19px;letter-spacing:-.02em;margin:0 0 4px}}
+
+/* ===== Mobile polish ===== */
+@media(max-width:760px){
+  html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+  .site-main,.section,.product-page,.cog-gallery-column,.cog-info-panel{min-width:0}
+  input,select,textarea{font-size:16px}
+  .site-header .wordmark,.site-footer .wordmark{display:inline-flex;align-items:center;min-height:44px}
+  .site-header nav{min-width:0;flex-shrink:0}
+  .site-header nav form{margin:0}
+  .site-header nav button{min-width:44px}
+  .login-error-banner{min-width:0;overflow-wrap:anywhere}
+  .login-error-banner button{min-height:44px;min-width:44px}
+  .admin-stock-sizes .admin-stat-card input[type=number]{min-height:44px;font-size:16px}
+  .admin-photo-upload input[type=file]{font-size:16px}
+  .admin-photo-upload input[type=file]::file-selector-button{min-height:44px}
+  .admin-orders-table select{min-height:44px}
+  .footer-links{min-width:0}
+  .footer-links a{min-width:0;overflow-wrap:anywhere}
+
+  /* Header: bigger tap targets, still fits 320px with Orders + Admin + Logout */
+  .site-header nav{gap:2px;font-size:10px;letter-spacing:.1em}
+  .site-header nav a,.site-header nav button{display:inline-flex;align-items:center;min-height:44px;padding:0 7px}
+  .site-header nav>:last-child{padding-right:0}
+  .site-header{padding:0 12px 0 18px}
+
+  /* Inputs at 16px so iOS Safari does not zoom on focus */
+  .form-stack input,.form-stack textarea,.form-stack select,.size-select,
+  .admin-inline-form input,.admin-filter select,.admin-orders-table select,
+  .admin-product-fields input,.admin-product-fields select,.admin-stock-sizes input,
+  .admin-photo-upload select,.admin-variant-price input{font-size:16px}
+
+  /* Buttons and small controls: 44px touch targets */
+  .button{min-height:48px}
+  .admin-save-link,.admin-delete-order{min-height:44px;padding:0 14px}
+  .cog-style-toggle button{min-height:44px}
+  .cog-size-options{flex-wrap:wrap}
+  .cog-size-options button{width:56px;height:48px}
+  .cog-accordions summary{padding:18px 2px}
+  .product-meta{flex-wrap:wrap}
+
+  /* Campaign hero: stack countdown above copy instead of overlapping absolutes */
+  .hero:not(.hero-teaser){min-height:0;display:block;padding:0}
+  .hero-content{position:relative;inset:auto;display:flex;flex-direction:column;justify-content:space-between;gap:28px;min-height:min(88svh,760px);padding:20px 18px 34px}
+  .hero-drop-countdown{position:static;order:-1;width:100%;max-width:none;padding:16px 18px;transform:none}
+  .hero-drop-countdown .countdown{justify-content:space-between;gap:8px}
+  .hero-copy{position:static;order:0;width:100%;max-width:460px;transform:none}
+  .hero h1{font-size:clamp(56px,20vw,96px);margin:14px 0}
+  .hero-actions{flex-direction:column;gap:10px;margin-top:26px}
+  .hero-actions .button{width:100%}
+  .hero .eyebrow{line-height:1.7}
+
+  /* Product page: model label no longer covers the photo */
+  .cog-model-label{top:10px;right:10px;min-width:0;gap:1px;padding:8px 10px}
+  .cog-model-label span{font-size:9px;letter-spacing:.1em}
+  .cog-model-label strong{font-size:13px}
+  .cog-thumbnails button{flex-basis:46%}
+  .cog-countdown .countdown b{font-size:clamp(22px,7.5vw,32px)}
+
+  /* Footer */
+  .footer-links{gap:6px 18px}
+  .footer-links a{display:inline-flex;align-items:center;min-height:44px}
+  .site-footer{padding-bottom:max(20px,env(safe-area-inset-bottom))}
+
+  /* Admin orders table keeps its scroll, but make that obvious and smooth */
+  .admin-table-wrap{-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain}
+  .admin-status-form{min-width:170px}
+}
+@media(max-width:380px){
+  .site-header nav{letter-spacing:.06em}
+  .site-header nav a,.site-header nav button{padding:0 5px}
+  .wordmark{font-size:17px}
+  .section{padding:52px 16px}
+  .product-page{padding:30px 16px 56px}
+  .admin-overview{grid-template-columns:1fr 1fr}
+  .admin-demand-overview .admin-stat-card strong{font-size:26px}
+}
+
+@media(max-width:639px){
+  /* Orders: stacked cards instead of an 850px sideways-scrolling table */
+  .table-wrap{border:0;overflow:visible}
+  .table-wrap table{display:block;min-width:0}
+  .table-wrap thead{display:none}
+  .table-wrap tbody{display:grid;gap:12px}
+  .table-wrap tr{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px 16px;padding:16px;border:1px solid var(--line);background:rgba(255,255,255,.02)}
+  .table-wrap td{min-width:0;padding:0;border:0;overflow-wrap:anywhere}
+  .table-wrap td::before{display:block;margin-bottom:3px;color:var(--muted);font-size:9px;letter-spacing:.12em;text-transform:uppercase}
+  .table-wrap td:nth-child(1){grid-column:1/-1;font-size:14px}
+  .table-wrap td:nth-child(1)::before{content:"Product"}
+  .table-wrap td:nth-child(2)::before{content:"Size"}
+  .table-wrap td:nth-child(3)::before{content:"Qty"}
+  .table-wrap td:nth-child(4)::before{content:"Shipping"}
+  .table-wrap td:nth-child(5)::before{content:"Total"}
+  .table-wrap td:nth-child(6){grid-column:1/-1}
+  .table-wrap td:nth-child(6)::before{content:"Status"}
+  .table-wrap td:nth-child(7)::before{content:"Date"}
+
+}

@@ -101,3 +101,28 @@
   .co-size{min-width:58px}
   .co-summary{padding:22px}
 }
+
+/* ===== Mobile polish ===== */
+@media(max-width:760px){
+  .co,.co-layout,.co-main,.co-main>*,.co-summary,.co-panel,.co-field{min-width:0}
+  .co input,.co select,.co textarea,.co-field input[type=file]{max-width:100%;font-size:16px}
+  .co-field input[type=file]::file-selector-button{min-height:44px}
+  .co-step-head{flex-wrap:wrap;row-gap:4px}
+  .co-step-title{min-width:0;overflow-wrap:anywhere}
+  .co-step-hint{margin-left:0;flex-basis:100%}
+  .co-copy{min-height:44px;padding:0 14px}
+  .co-copyrow{flex-wrap:wrap;min-width:0}
+  .co-btn,.co-qr-download{min-height:48px;justify-content:center}
+  .co-back{display:inline-flex;align-items:center;min-height:44px}
+  .co-qty button{width:52px;height:52px}
+  .co-size{min-height:52px}
+  .co-sizes{gap:8px}
+  .co-gotyme{grid-template-columns:minmax(0,1fr)}
+  .co-qr-frame{justify-self:start;width:min(100%,272px)}
+  .co-summary{padding-bottom:max(22px,env(safe-area-inset-bottom))}
+}
+@media(max-width:560px){
+  .co-btn,.co-qr-download{width:100%}
+  .co-amount{padding:18px}
+  .co-title{margin-bottom:24px}
+}
