@@ -53,8 +53,8 @@ export default function ChildOfGodProduct({ product, variants, signedIn, isAdmin
   const modelStyle = modelPhoto?.shirt_style ?? (/heavy/i.test(modelImageName) ? "heavy" : variant?.name ?? "");
   const modelView = modelPhoto?.view ?? (/back/i.test(modelImageName) ? "back" : displayedView);
   const modelDetails = /standard/i.test(modelStyle)
-    ? modelView === "front" ? { name: "Mada", height: "5′5″", size: "Small" } : { name: "Keanna", height: "5′7″", size: "Small" }
-    : { name: "Pepe", height: "5′8″", size: "Large" };
+    ? modelView === "front" ? { name: "Mada", height: "5′4″", size: "Small" } : { name: "Keanna", height: "5′6″", size: "Small" }
+    : { name: "Pepe", height: "5′6″", size: "Large" };
   const galleryPhotos = product.product_images;
   const orderHref = `/checkout/${product.slug}?variant=${encodeURIComponent(variant?.id ?? "")}&size=${encodeURIComponent(size)}`;
   const orderUrl = signedIn ? orderHref : `/login?next=${encodeURIComponent(orderHref)}`;
