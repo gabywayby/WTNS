@@ -2,6 +2,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import sharp from "sharp";
 async function adminClient(){const supabase=await createClient();const {data:{user}}=await supabase.auth.getUser();if(!user) redirect("/");const {data}=await supabase.from("admins").select("user_id").eq("user_id",user.id).maybeSingle();if(!data) redirect("/");return supabase;}
 export async function updateOrder(formData:FormData){const supabase=await adminClient();const id=String(formData.get("id")??"");const status=String(formData.get("status")??"");if(!id||!["pending","paid","shipped","delivered","completed","cancelled"].includes(status))return;const {data:order}=await supabase.from("orders").select("status").eq("id",id).maybeSingle();if(!order||order.status==="cancelled")return;const {data:updated,error}=await supabase.from("orders").update({status}).eq("id",id).neq("status","cancelled").select("id,status").maybeSingle();if(error||!updated){redirect(error&&/stock|enough/i.test(error.message)?"/orders?error=stock":"/orders?error=status-save");}revalidatePath("/admin");revalidatePath("/orders");redirect("/orders?saved=1");}
 export async function deleteOrder(formData:FormData){const supabase=await adminClient();const id=String(formData.get("id")??"");if(!id)redirect("/orders?error=delete-order");const {data:deleted,error}=await supabase.from("orders").delete().eq("id",id).select("id,receipt_path").maybeSingle();if(error||!deleted)redirect("/orders?error=delete-order");if(deleted.receipt_path)await supabase.storage.from("payment-receipts").remove([deleted.receipt_path]);revalidatePath("/orders");}
@@ -42,7 +43,23 @@ export async function uploadProductPhotos(formData:FormData){
  const variantNames=(product.product_variants??[]).map((variant)=>variant.name);if(shirtStyle&&!variantNames.includes(shirtStyle))redirect("/admin?error=photos-save");
  const {data:lastPhoto,error:lastPhotoError}=await supabase.from("product_images").select("sort_order").eq("product_id",productId).order("sort_order",{ascending:false}).limit(1).maybeSingle();if(lastPhotoError)redirect("/admin?error=photos-save");
  let sortOrder=(lastPhoto?.sort_order??0)+1;
- for(const file of files){const extension=imageExtensions[file.type];const path=`${productId}/${crypto.randomUUID()}.${extension}`;const {error:uploadError}=await supabase.storage.from("product-photos").upload(path,file,{contentType:file.type,upsert:false});if(uploadError)redirect("/admin?error=photos-save");const {data:{publicUrl}}=supabase.storage.from("product-photos").getPublicUrl(path);const {error:insertError}=await supabase.from("product_images").insert({product_id:productId,url:publicUrl,sort_order:sortOrder++,shirt_style:shirtStyle||null,view});if(insertError)redirect("/admin?error=photos-save");}
+ for(const file of files){
+  const isWebp=file.type==="image/webp";
+  let imageData:Buffer;
+  try{
+   const image=sharp(await file.arrayBuffer()).rotate().resize({width:2000,height:2000,fit:"inside",withoutEnlargement:true});
+   // Sharp strips metadata by default; orient pixels before removing EXIF.
+   imageData=await (isWebp?image.webp({quality:80}):image.jpeg({quality:80})).toBuffer();
+  }catch{redirect("/admin?error=photos-save");}
+  const extension=isWebp?"webp":"jpg";
+  const contentType=isWebp?"image/webp":"image/jpeg";
+  const path=`${productId}/${crypto.randomUUID()}.${extension}`;
+  const {error:uploadError}=await supabase.storage.from("product-photos").upload(path,imageData,{contentType,cacheControl:"31536000",upsert:false});
+  if(uploadError)redirect("/admin?error=photos-save");
+  const {data:{publicUrl}}=supabase.storage.from("product-photos").getPublicUrl(path);
+  const {error:insertError}=await supabase.from("product_images").insert({product_id:productId,url:publicUrl,sort_order:sortOrder++,shirt_style:shirtStyle||null,view});
+  if(insertError)redirect("/admin?error=photos-save");
+ }
  revalidatePath("/admin");revalidatePath("/shop");
 }
 

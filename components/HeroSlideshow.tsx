@@ -6,12 +6,21 @@ import { useEffect, useState } from "react";
 type HeroSlide = { src: string; alt: string; objectPosition?: string };
 
 export default function HeroSlideshow({ images }: { images: HeroSlide[] }) {
-  const [activeIndex, setActiveIndex] = useState(0);
+  const [{ activeIndex, mounted }, setSlides] = useState(() => ({
+    activeIndex: 0,
+    mounted: new Set([0, 1]),
+  }));
 
   useEffect(() => {
     if (images.length < 2) return;
     const timer = window.setInterval(() => {
-      setActiveIndex((index) => (index + 1) % images.length);
+      setSlides((previous) => {
+        const activeIndex = (previous.activeIndex + 1) % images.length;
+        const mounted = new Set(previous.mounted);
+        mounted.add(activeIndex);
+        mounted.add((activeIndex + 1) % images.length);
+        return { activeIndex, mounted };
+      });
     }, 5000);
     return () => window.clearInterval(timer);
   }, [images.length]);
@@ -19,7 +28,7 @@ export default function HeroSlideshow({ images }: { images: HeroSlide[] }) {
   if (!images.length) return null;
 
   return <div className="hero-slideshow" aria-hidden="true">
-    {images.map((image, index) => <div key={image.src} className={`hero-slide-layer${index === activeIndex ? " is-active" : ""}`}>
+    {images.map((image, index) => mounted.has(index) && <div key={image.src} className={`hero-slide-layer${index === activeIndex ? " is-active" : ""}`}>
       <Image
         className="hero-slide-image"
         src={image.src}
