@@ -10,7 +10,7 @@ type StockSize = { size: string; stock: number };
 type Variant = { id: string; name: string; price_php: number; variant_stock: StockSize[] };
 type Fields = { full_name: string; phone: string; street: string; barangay: string; city: string; province: string; postal_code: string };
 
-const SIZE_ORDER = ["XS", "S", "M", "L", "XL", "2XL", "3XL"];
+const SIZE_ORDER = ["XS", "S", "M", "L", "XL", "XXL", "2XL", "3XL"];
 const rank = (size: string) => { const i = SIZE_ORDER.indexOf(size); return i === -1 ? 99 : i; };
 const peso = (n: number) => `₱${n.toLocaleString("en-PH")}`;
 

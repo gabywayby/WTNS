@@ -7,7 +7,7 @@ import { cancelOldPendingOrders, deleteOrder, updateOrder } from "@/app/admin/ac
 import { ConfirmCancelPendingButton, ConfirmDeleteOrderButton } from "@/components/ConfirmOrderActions";
 
 const statuses = ["pending", "paid", "shipped", "delivered", "completed", "cancelled"] as const;
-const sizes = ["S", "M", "L", "XL"] as const;
+const sizes = ["S", "M", "L", "XL", "XXL"] as const;
 const hoursUntil = (createdAt: string, holdHours: number) => Math.max(0, Math.ceil((new Date(createdAt).getTime() + holdHours * 60 * 60 * 1000 - Date.now()) / (60 * 60 * 1000)));
 
 async function OrdersContent({
@@ -89,7 +89,7 @@ async function OrdersContent({
       const demand: { productName: string; variantName: string | null; sizes: Record<string, number> } = sizeDemand.get(key) ?? {
         productName: productNames.get(order.product_id) ?? "WTNS item",
         variantName: order.variant_name,
-        sizes: { S: 0, M: 0, L: 0, XL: 0 },
+        sizes: { S: 0, M: 0, L: 0, XL: 0, XXL: 0 },
       };
       if (order.size in demand.sizes) demand.sizes[order.size] += Number(order.quantity);
       sizeDemand.set(key, demand);
@@ -105,7 +105,7 @@ async function OrdersContent({
       const demand: { productName: string; variantName: string | null; sizes: Record<string, number> } = shirtsToDeliver.get(key) ?? {
         productName: productNames.get(order.product_id) ?? "WTNS item",
         variantName: order.variant_name,
-        sizes: { S: 0, M: 0, L: 0, XL: 0 },
+        sizes: { S: 0, M: 0, L: 0, XL: 0, XXL: 0 },
       };
       if (order.size in demand.sizes) demand.sizes[order.size] += Number(order.quantity);
       shirtsToDeliver.set(key, demand);
@@ -118,7 +118,7 @@ async function OrdersContent({
       const sold: { productName: string; variantName: string | null; sizes: Record<string, number> } = shirtsSold.get(key) ?? {
         productName: productNames.get(order.product_id) ?? "WTNS item",
         variantName: order.variant_name,
-        sizes: { S: 0, M: 0, L: 0, XL: 0 },
+        sizes: { S: 0, M: 0, L: 0, XL: 0, XXL: 0 },
       };
       if (order.size in sold.sizes) sold.sizes[order.size] += Number(order.quantity);
       shirtsSold.set(key, sold);

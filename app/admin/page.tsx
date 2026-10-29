@@ -10,7 +10,7 @@ import {
   uploadProductPhotos,
 } from "./actions";
 
-const sizes = ["S", "M", "L", "XL"] as const;
+const sizes = ["S", "M", "L", "XL", "XXL"] as const;
 
 function AdminError({ code }: { code?: string }) {
   if (!code) return null;

@@ -20,7 +20,7 @@ type Props = {
 };
 
 const peso = (amount: number) => new Intl.NumberFormat("en-PH", { style: "currency", currency: "PHP", maximumFractionDigits: 0 }).format(amount);
-const sizeOrder = ["S", "M", "L", "XL"];
+const sizeOrder = ["S", "M", "L", "XL", "XXL"];
 const sizeRank = (size: string) => { const index = sizeOrder.indexOf(size); return index < 0 ? sizeOrder.length : index; };
 
 function manilaDate(date: string | null) {
